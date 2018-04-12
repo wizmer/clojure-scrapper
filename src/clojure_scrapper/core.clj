@@ -1,11 +1,11 @@
 (ns clojure-scrapper.core
-  (:gen-class))
-
-(ns tutorial.scrape1
   (:require [net.cgrand.enlive-html :as html]
             [clojure.string :as s]
             [clj-http.client :as client]
-            [cemerick.url :as url]))
+            [cemerick.url :as url])
+  (:gen-class))
+
+
 
 (def ^:dynamic *base-url* "https://news.ycombinator.com/")
 

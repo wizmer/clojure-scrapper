@@ -3,13 +3,11 @@
 
 (set-env! :resource-paths #{"resources" "src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "RELEASE"]
+          :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [enlive "1.1.6"]
                             [cheshire "5.5.0"]
                             [clj-http "3.8.0"]
                             [com.cemerick/url "0.1.1"]
-                            [ring "1.2.0"]
-                            [net.cgrand/moustache "1.1.0"]
                             [adzerk/boot-test "RELEASE" :scope "test"]])
 
 (task-options!
