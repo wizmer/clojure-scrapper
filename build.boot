@@ -1,7 +1,7 @@
 (def project 'clojure-scrapper)
 (def version "0.1.0-SNAPSHOT")
 
-(set-env! :resource-paths #{"resources" "src"}
+(set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [enlive "1.1.6"]

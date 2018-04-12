@@ -63,21 +63,27 @@
                                  (/ price surface))
         data {:surface surface
               :price price
-              :address (get-address item)
+              :raw-address (get-address item)
+              :address (reorder-address (get-address item))
               :price-per-meter-square price-per-meter-square
               :url url}]
-    (assoc data :commute-time (add-commute-time data))
-    ))
+    (assoc data :commute-time (add-commute-time data))))
 
+(defn reorder-address [address]
+  (let [m (re-find #"(rue|avenue|street) ([0-9]+) (.*)" (s/lower-case address))]
+    (if m
+      (apply str (interpose " " [(nth m 2) (second m)  (nth m 3)]))
+      address)))
 
 
 (def urls
   (get-urls (fetch-url *base-url*)))
 
-(def data (map aggregate-data urls))
-(def d (last data))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!"))
+  (let [data (map aggregate-data urls)
+        d (last data)]
+    (filter #(< (:commute-time %) 3000) data))
+)
