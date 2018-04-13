@@ -1,6 +1,7 @@
 (ns clojure-scrapper.core
   (:require [net.cgrand.enlive-html :as html]
             [clojure.string :as s]
+            [hiccup.table]
             [clj-http.client :as client]
             [cemerick.url :as url])
   (:gen-class))
@@ -101,5 +102,7 @@
   [& args]
   (let [data (map aggregate-data urls)
         d (last data)]
+    (hiccup.core/html
+     (hiccup.table/to-table1d data [:price "price" :address "address"]))
     )
 )
