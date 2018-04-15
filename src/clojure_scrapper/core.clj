@@ -1,6 +1,7 @@
 (ns clojure-scrapper.core
   (:require [net.cgrand.enlive-html :as html]
             [clojure.string :as s]
+            [hiccup.table]
             [clj-http.client :as client]
             [cemerick.url :as url])
   (:gen-class))
@@ -95,6 +96,10 @@
   (filter filters data))
 
 (def data (atom {}))
+
+(defn to-html [data]
+  (hiccup.core/html
+   (hiccup.table/to-table1d data [:price "price" :address "address"])))
 
 (defn -main
   "I don't do a whole lot ... yet."
