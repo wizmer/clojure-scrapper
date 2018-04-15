@@ -6,10 +6,9 @@
   (:gen-class))
 
 
+(def ^:dynamic *base-url* "https://www.anibis.ch/fr/immobilier-immobilier-locations-gen%c3%a8ve--418/advertlist.aspx?aral=834_1200_1900&action=filter")
 
-(def ^:dynamic *base-url* "https://news.ycombinator.com/")
-
-  (def ^:dynamic *base-url* "https://www.anibis.ch/fr/immobilier-immobilier-locations-gen%c3%a8ve--418/advertlist.aspx?aral=834_1200_1900&action=filter")
+(def db (atom {}))
 
 (defn fetch-url [url]
   (html/html-resource (java.net.URL. url)))
@@ -51,7 +50,6 @@
 (defn google-map-url [data]
   (str "https://maps.googleapis.com/maps/api/directions/json?mode=bicycling&origin=" "Campus+Biotech,+Chemin+des+Mines+9,+1202+Genève" "&destination=" (url/url-encode (:address data)) "&key=" (slurp "google-map-api.key")))
 
-(def db (atom {}))
 
 (defn add-commute-time [data]
   (let [url (google-map-url data)]
@@ -96,10 +94,10 @@
 (defn all-filters [data]
   (filter filters data))
 
+(def data (atom {}))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (let [data (map aggregate-data urls)
-        d (last data)]
-    )
+  (reset! data (map aggregate-data urls))
 )
