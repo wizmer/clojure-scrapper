@@ -1,6 +1,7 @@
 (ns clojure-scrapper.anibis
   (:require [net.cgrand.enlive-html :as html]
             [clojure.string :as s]
+            [clojure-scrapper.common :refer [fetch-url]]
             [hiccup.table]
             [hiccup.core]
             [clj-http.client :as client]
@@ -37,7 +38,7 @@
                   "_&action=filter")]
     (map  #(str "https://www.anibis.ch"
                 (get-in % [:attrs :href]))
-          (html/select (clojure-scrapper.core/fetch-url base-url) [:.page-segment-item-listing :.list-item :a]) )))
+          (html/select (fetch-url base-url) [:.page-segment-item-listing :.list-item :a]) )))
 
 (defn get-images [item]
   (map #(get-in % [:attrs :href]) (html/select item [:.page-segment-gallery :.swiper-wrapper :a])))

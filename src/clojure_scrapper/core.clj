@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [clojure-scrapper.anibis :as anibis]
             [clojure-scrapper.homegate :as homegate]
+            [clojure-scrapper.common :refer [fetch-url]]
             [hiccup.table]
             [hiccup.core]
             [clj-http.client :as client]
@@ -16,8 +17,7 @@
 
 (def veto #{"https://www.anibis.ch/fr/d-immobilier-immobilier-locations-genève--418/a-echanger-uniquement-appartement-4-pièces-contre-3-pièces--23919200.aspx?aral=834_1200_1800,851_35_&view=2&fcid=418"})
 
-(defn fetch-url [url]
-  (html/html-resource (java.net.URL. url)))
+
 
 
 (defn google-map-url [data]
