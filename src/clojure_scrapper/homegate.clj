@@ -39,7 +39,9 @@
   nil)
 
 (defn get-images [item]
-  nil)
+  (map #(str "https://www.homegate.ch" (get-in  % [:attrs :data-lazy]))
+       (html/select item [:#detail-gallery-slides :img])))
+
 (defn get-raw-data [item]
   {:surface (get-surface item)
    :price (get-price item)

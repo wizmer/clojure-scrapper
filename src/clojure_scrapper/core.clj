@@ -72,7 +72,7 @@
    (not (veto (item :url)))
    (item :commute-time)
    (< (:commute-time item) 1600)
-   (not (contains?  #{"Bureau" "Commerce" "Studio"} (str (:type item)) ))))
+   (not (contains?  #{"Chambre" "Bureau" "Commerce" "Studio"} (str (:type item)) ))))
 
 (defn all-filters [data]
   (filter filters data))

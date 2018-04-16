@@ -27,6 +27,7 @@
                                "trial"
                                "taille : l"
                                "taille : m"
+                               "freeride"
                                "elect"
                                "élect"
                                "1m8"
