@@ -41,7 +41,11 @@
 
 
 (defn custom-annotations [item]
-  (let [transform {"https://www.anibis.ch/fr/d-immobilier-immobilier-locations-genève--418/a-remettre-bail-au-1er-mai-appart-3p,-pâquis--23972198.aspx?aral=834_1200_1900&view=2&fcid=418"
+  (let [transform {"https://www.anibis.ch/fr/d-immobilier-immobilier-locations-genève--418/a-remettre-bail-au-1er-mai-appart-3p,-pâquis--23972198.aspx?aral=834_1200_1800,851_40_&view=2&fcid=418"
+                   (fn [item] (assoc item :price 1680
+                                     :price-per-meter-square 30.54))
+
+                   "https://www.homegate.ch/louer/108313236"
                    (fn [item] (assoc item :price 1680
                                      :price-per-meter-square 30.54))}]
     (if (contains? transform (item :url))
@@ -112,5 +116,6 @@
 
      (write-html!
       (hiccup.core/html [:lu (map html-item  filtered)]))
+     (clojure.java.browse/browse-url "index.html")
      filtered))
 )
