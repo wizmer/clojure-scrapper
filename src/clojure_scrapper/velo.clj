@@ -48,5 +48,20 @@
   {:title (get-in item [:attrs :title])
    :url (get-in item [:attrs :href])})
 
+(def veto #{"//www.leboncoin.fr/velos/1417663600.htm?ca=22_s"
+            "//www.leboncoin.fr/velos/1413053717.htm?ca=22_s"
+            "//www.leboncoin.fr/velos/1417482251.htm?ca=22_s"
+            "//www.leboncoin.fr/velos/1417033848.htm?ca=22_s"
+            "//www.leboncoin.fr/velos/1416850917.htm?ca=22_s"
+            "//www.leboncoin.fr/velos/1416784917.htm?ca=22_s"})
+
 (defn get-titles [items]
-  (map format-result items))
+  (filter #(not (contains? veto (:url %)))
+          (map format-result items)))
+
+(defn -main []
+  (println "Resultats dans l'Ain")
+  (clojure.pprint/pprint (get-titles (get-urls ain-url)))
+
+  (println "\n\n\nResultats en Haute-Savoie")
+  (clojure.pprint/pprint (get-titles (get-urls haute-savoie-url))))
