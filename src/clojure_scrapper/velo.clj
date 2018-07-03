@@ -8,13 +8,47 @@
             [cemerick.url :as url]))
 
 
-(def ain-url "https://www.leboncoin.fr/velos/offres/rhone_alpes/ain/?th=1&q=vtt&it=1&ps=12")
-(def haute-savoie-url "https://www.leboncoin.fr/velos/offres/rhone_alpes/haute_savoie/?th=1&q=vtt&it=1&ps=12")
+(defn make-url [department]
+  {}
+  (str"https://www.leboncoin.fr/velos/offres/rhone_alpes/" department "/?th=1&q=vtt&it=1&ps=12"))
 
 
+
+(def veto #{"1417663600"
+            "1417482251"
+            "1420624462"
+            "1421643446"
+            "1420499660"
+            "1421270190"
+            "1423570222"
+            "1422036827"
+            "1420913546"
+            "1417033848"
+            "1423846119"
+            "1416850917"
+            "1423529009"
+            "1413053717"
+            "1417988312"
+            "1418117554"
+            "1391589490"
+            "1419714339"
+            "1420192076"
+            "1423853613"
+            "1416669974"
+            "1420561549"
+            "1420833976"
+            "1421765818"
+            "1422238809"
+            "1423194874"
+            "1422276373"
+            "1416784917"}
+  )
 
 (defn get-urls [base-url]
-  (let [vetoed-words (re-pattern
+  (let [all-urls (html/select (fetch-url base-url)
+                     [(html/attr= :itemtype "http://schema.org/Offer") :a])
+
+        vetoed-words (re-pattern
                       (s/join "|"
                               ["dh"
                                "enduro"
@@ -23,6 +57,8 @@
                                "taille m/l"
                                "taille l"
                                "taille m"
+                               "shimano alivio"
+                               "shimano deore"
                                "xl"
                                "trial"
                                "taille : l"
@@ -34,34 +70,40 @@
                                "180cm"]))
 
         no-enduro-no-dh (fn [item]
-                          (let [title (s/lower-case (get-in item [:attrs :title]))]
-                            (and (not (re-find vetoed-words title))
-                                 (let [detail (fetch-url (str "https:"
-                                                              (get-in item [:attrs :href])))
+                          (let [item-url (str "https:" (get-in item [:attrs :href]))
+                                item-id (second (re-find #"velos\/(.*)\.htm" item-url))
+                                title (s/lower-case (get-in item [:attrs :title]))]
+                            (and
+                             (not (contains? veto item-id))
+                             (not (re-find vetoed-words title))
+                             (let [detail (fetch-url item-url)
                                        text (s/lower-case
                                              (get-in (first (html/select detail
                                                                         [(html/attr= :name "description")])) [:attrs :content]))]
                                    (not (re-find vetoed-words text))))))]
-    (filter no-enduro-no-dh (html/select (fetch-url base-url) [(html/attr= :itemtype "http://schema.org/Offer") :a]))))
+    (filter no-enduro-no-dh
+            all-urls)))
 
 (defn format-result [item]
   {:title (get-in item [:attrs :title])
-   :url (get-in item [:attrs :href])})
+   :url (str "https:" (get-in item [:attrs :href]))})
 
-(def veto #{"//www.leboncoin.fr/velos/1417663600.htm?ca=22_s"
-            "//www.leboncoin.fr/velos/1413053717.htm?ca=22_s"
-            "//www.leboncoin.fr/velos/1417482251.htm?ca=22_s"
-            "//www.leboncoin.fr/velos/1417033848.htm?ca=22_s"
-            "//www.leboncoin.fr/velos/1416850917.htm?ca=22_s"
-            "//www.leboncoin.fr/velos/1416784917.htm?ca=22_s"})
+
 
 (defn get-titles [items]
-  (filter #(not (contains? veto (:url %)))
-          (map format-result items)))
+  (map format-result items))
 
+(def data (atom {}))
+
+(defn fill-data! [department]
+  (swap! data assoc department (get-titles (get-urls (make-url department)))))
+
+(defn browse [data]
+  (let [all-departments-data (apply concat (vals data))]
+    (map #(clojure.java.browse/browse-url (:url %))
+       all-departments-data)))
 (defn -main []
-  (println "Resultats dans l'Ain")
-  (clojure.pprint/pprint (get-titles (get-urls ain-url)))
-
-  (println "\n\n\nResultats en Haute-Savoie")
-  (clojure.pprint/pprint (get-titles (get-urls haute-savoie-url))))
+  (doseq [department ["savoie" "haute_savoie" "ain"]]
+    (fill-data! department))
+  (browse @data)
+  )

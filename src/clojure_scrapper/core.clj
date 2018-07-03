@@ -1,6 +1,7 @@
 (ns clojure-scrapper.core
   (:require [net.cgrand.enlive-html :as html]
             [clojure.string :as s]
+            [clojure.java.browse :refer [browse-url]]
             [clojure-scrapper.anibis :as anibis]
             [clojure-scrapper.homegate :as homegate]
             [clojure-scrapper.common :refer [fetch-url]]
@@ -112,10 +113,11 @@
                (anibis/get-urls max-price min-surface)
                (homegate/get-urls max-price min-surface))
          data (map aggregate-data urls)
+
          filtered (all-filters data)]
 
      (write-html!
       (hiccup.core/html [:lu (map html-item  filtered)]))
-     (clojure.java.browse/browse-url "index.html")
+     (browse-url "index.html")
      filtered))
 )
