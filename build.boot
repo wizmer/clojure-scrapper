@@ -37,4 +37,9 @@
     (require '[clojure-scrapper.core :as app])
     (apply (resolve 'app/-main) args)))
 
+(deftask dev
+  []
+  (repl))
+
+
 (require '[adzerk.boot-test :refer [test]])
