@@ -1,10 +1,9 @@
 (ns clojure-scrapper.leboncoin
   (:require [clojure-scrapper.common :refer [fetch-url]]
             [net.cgrand.enlive-html :as html]
+            [clojure.data.json :as json]
             [clojure.string :as s]))
 
-;; (def db (atom {:all {}
-;;                :items {}}))
 
 (defn gogo []
   (if (empty? (@db :all))
@@ -22,12 +21,31 @@
          new-urls new-items)))
   (println "done"))
 
-(defn find-script []
-  (let [scripts (html/select (val (first (@db :items))) [:script])]
-    (filter #(and (not (nil? (:content %)))
-                 (s/starts-with? (:content (first (html/select (val (first (@db :items))) [:script]))) "window")
-                 )
+(defn get-json-data [item]
+  (let [scripts (html/select (val item) [:script])
+        script-with-content (filter #(not (nil? (:content %))) scripts)
+        window-script (filter #(s/starts-with? (first (:content %)) "window.FLUX_STATE") script-with-content)
+        content (first (:content (first window-script)))
+        json-data (second (s/split content #"=" 2))]
+    (json/read-str json-data )
+    ))
 
-            scripts)))
 
-(get-item)
+;; (def db (atom {:all {}
+;;                :items {}}))
+;; (get-item)
+
+
+
+(defn extract-pertinent-info [data]
+  (let [attributes (get-in data  ["adview" "attributes"])
+        extract {"body" ["adview" "body"]
+                 "price" ["adview" "price"]}
+        info (into {} (for [[k v] extract] [k (get-in data v)]))
+        info2 (into {} (map #(vector (% "key_label") (% "value_label")) attributes))
+        ]
+    (merge info info2)
+    ))
+
+(extract-pertinent-info (get-json-data  (first (@db :items))))
+;; (map find-script  (@db :items))

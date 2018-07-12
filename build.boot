@@ -6,6 +6,7 @@
           :dependencies   '[[org.clojure/clojure "1.9.0"]
                             [enlive "1.1.6"]
                             [hiccup-table "0.2.0"]
+                            [org.clojure/data.json "0.2.6"]
                             [cheshire "5.5.0"]
                             [clj-http "3.8.0"]
                             [com.cemerick/url "0.1.1"]
