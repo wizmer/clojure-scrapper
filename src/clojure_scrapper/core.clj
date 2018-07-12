@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [clojure.java.browse :refer [browse-url]]
             [clojure-scrapper.anibis :as anibis]
+						[clojure-scrapper.leboncoin :as leboncoin]
             [clojure-scrapper.homegate :as homegate]
             [clojure-scrapper.common :refer [fetch-url]]
             [hiccup.table]
@@ -26,19 +27,21 @@
 
 
 (defn add-commute-time [data]
-  (let [url (google-map-url data)]
+  (when (data :address)
+		(let [url (google-map-url data)]
     (if (contains? @db url)
       (@db url)
       (do (let [time (get-in (client/get url {:as :json})
                              [:body :routes 0 :legs 0 :duration :value])]
             (swap! db assoc url time)
-            time)))))
+            time))))))
 
 (defn reorder-address [address]
-  (let [m (re-find #"(rue|avenue|street) ([0-9]+) (.*)" (s/lower-case address))]
+  (when address
+		(let [m (re-find #"(rue|avenue|street) ([0-9]+) (.*)" (s/lower-case address))]
     (if m
       (apply str (interpose " " [(nth m 2) (second m)  (nth m 3)]))
-      address)))
+      address))))
 
 
 (defn custom-annotations [item]
@@ -54,9 +57,14 @@
       item)))
 
 (defn aggregate-data [url]
-  (let [raw-data (if (clojure.string/starts-with? url "https://www.anibis")
-                   (clojure-scrapper.anibis/get-raw-data (fetch-url url))
-                   (clojure-scrapper.homegate/get-raw-data (fetch-url url)))
+  (let [raw-data (case (subs url 0 18)
+									 "https://www.anibis"
+									 (clojure-scrapper.anibis/get-raw-data (fetch-url url))
+                   "https://www.homega"
+									 (clojure-scrapper.homegate/get-raw-data (fetch-url url))
+									 "https://www.lebonc"
+									 (clojure-scrapper.leboncoin/get-raw-data (fetch-url url)))
+
         price-per-meter-square (if (and (raw-data :price) (raw-data :surface))
                                  (/ (raw-data :price) (raw-data :surface)))
 
@@ -96,7 +104,9 @@
   (let [title
         (apply str (interpose " - " [(str (item :surface) "m2")
                                      (str (item :price) " CHF")
-                                     (str (int (/ (item :commute-time) 60.)) " min")]))
+                                     (if (item :commute-time)
+																			 (str (int (/ (item :commute-time) 60.)) " min")
+																			 "N/A minute")]))
         img (when (first (item :images))
               [:img {:src (first (item :images)) :height 200 :width 200}])]
     [:li [:a {:href (:url item)} (or img "link")]
@@ -110,14 +120,17 @@
   ([] (-main 1800 40))
   ([max-price min-surface]
    (let [urls (concat
-               (anibis/get-urls max-price min-surface)
-               (homegate/get-urls max-price min-surface))
+							 (leboncoin/get-urls)
+               ;; (anibis/get-urls max-price min-surface)
+               ;; (homegate/get-urls max-price min-surface)
+							 )
          data (map aggregate-data urls)
-
          filtered (all-filters data)]
 
+		  ;; (println data)
      (write-html!
-      (hiccup.core/html [:lu (map html-item  filtered)]))
+      (hiccup.core/html [:lu (map html-item  data)]))
      (browse-url "index.html")
-     filtered))
+     filtered
+		 ))
 )
